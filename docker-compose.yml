@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  livekit:
+    build: ./livekit
+    container_name: livekit-server
+    ports:
+      - "7880:7880/tcp"
+      - "7881:7881/tcp"
+      - "50000-50100:50000-50100/udp"
+    command: ["livekit-server", "--config", "/etc/livekit.yaml"]
+    volumes:
+      - ./livekit-docker.yaml:/etc/livekit.yaml:ro
+
+  agent:
+    build: ./agent-starter-python
+    container_name: agent-python
+    depends_on:
+      - livekit
+    environment:
+      - LIVEKIT_URL=ws://livekit:7880
+      - LIVEKIT_API_KEY=APIcyMmEUQTDGnS
+      - LIVEKIT_API_SECRET=EfnCKnGxm8dyz8x7kia5UoP8coukwGmoVemUrBSiRBc
+      # 可选：如需使用 OpenAI/AssemblyAI/Cartesia 模型，请在主机环境设置以下变量
+      - OPENAI_API_KEY
+      - ASSEMBLYAI_API_KEY
+      - CARTESIA_API_KEY
+    # 覆盖镜像默认命令，使用 dev 模式便于前端本地联调
+    command: ["uv", "run", "src/agent.py", "dev"]
+
+  web:
+    build: 
+      context: ./agent-starter-react
+      target: development
+    container_name: agent-react
+    working_dir: /app
+    depends_on: 
+      - livekit
+      - agent
+    environment:
+      - LIVEKIT_URL=ws://localhost:7880
+      - LIVEKIT_API_KEY=APIcyMmEUQTDGnS
+      - LIVEKIT_API_SECRET=EfnCKnGxm8dyz8x7kia5UoP8coukwGmoVemUrBSiRBc
+    volumes:
+      # Mount source code for hot reload in development
+      - ./agent-starter-react:/app
+      - react_node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+
+volumes:
+  react_node_modules:
