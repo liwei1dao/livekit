@@ -1,0 +1,32 @@
+# 本地 LiveKit Python 代理依赖
+
+# LiveKit 代理和插件
+livekit-agents[silero,turn-detector]~=1.2
+livekit-plugins-openai
+livekit-plugins-deepgram
+livekit-plugins-elevenlabs
+livekit-plugins-noise-cancellation~=0.2
+python-dotenv
+openai
+PyJWT
+cryptography
+
+# 数值计算 (用于音频处理)
+numpy>=1.24.0
+
+# 异步 HTTP 客户端 (可选)
+aiohttp>=3.9.0
+
+# 日志增强 (可选)
+colorlog>=6.7.0
+
+# 配置文件处理 (可选)
+python-dotenv>=1.0.0
+
+# 音频处理库 (可选，用于更高级的音频处理)
+# librosa>=0.10.0  # 取消注释以启用高级音频分析
+# soundfile>=0.12.0  # 音频文件读写
+
+# 开发依赖 (可选)
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0

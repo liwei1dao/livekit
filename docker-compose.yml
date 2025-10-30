@@ -28,6 +28,49 @@ services:
     # 覆盖镜像默认命令，使用 dev 模式便于前端本地联调
     command: ["uv", "run", "src/agent.py", "dev"]
 
+  # 本地 Python 代理 - 完全本地部署，不依赖 LiveKit 云服务
+  local-agent:
+    build: ./local-python-agent
+    container_name: local-python-agent
+    depends_on:
+      - livekit
+    environment:
+      - LIVEKIT_URL=ws://livekit:7880
+      - LIVEKIT_API_KEY=APIcyMmEUQTDGnS
+      - LIVEKIT_API_SECRET=EfnCKnGxm8dyz8x7kia5UoP8coukwGmoVemUrBSiRBc
+      - ROOM_NAME=test-room
+      - PARTICIPANT_NAME=local-agent
+      - LOG_LEVEL=INFO
+      # AI服务API密钥 - 需要用户设置
+      - OPENAI_API_KEY
+      - DEEPGRAM_API_KEY
+      - ELEVENLABS_API_KEY
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Go语言RTC AI代理 - 使用Go语言和RTC协议实现
+  go-agent:
+    build: ./local-go-agent
+    container_name: local-go-agent
+    depends_on:
+      - livekit
+    environment:
+      - LIVEKIT_URL=ws://livekit:7880
+      - LIVEKIT_API_KEY=APIcyMmEUQTDGnS
+      - LIVEKIT_API_SECRET=EfnCKnGxm8dyz8x7kia5UoP8coukwGmoVemUrBSiRBc
+      - ROOM_NAME=test-room
+      - PARTICIPANT_NAME=go-ai-agent
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ps", "aux", "|", "grep", "main"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   web:
     build: 
       context: ./agent-starter-react
